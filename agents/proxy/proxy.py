@@ -34,7 +34,8 @@ from taos.im.protocol import MarketSimulationStateUpdate, MarketSimulationConfig
 from taos.im.protocol.models import MultiAssetSimulationConfig
 from taos.im.protocol.simulator import SimulatorResponseBatch
 from taos.im.protocol.events import SimulationStartEvent
-from taos.im.validator.engines.simulation import flatten_multiasset_state
+from taos.im.validator.engines.simulation import flatten_multiasset_state, _read_first_and_last_nonempty
+from taos.im.validator.fundamental import stamp as stamp_fundamental
 from taos.im.validator.reward import set_delays
 
 from ypyjson import YpyObject
@@ -84,6 +85,11 @@ class Proxy(Validator):
         self.config = self.config()
         self.config.merge(base_config)
         self.config.neuron.timeout = launcher_config['proxy']['timeout']
+        # The validator identity agents see in state.dendrite.hotkey; several proxies sharing agents need distinct ones.
+        self.validator_hotkey = launcher_config['proxy'].get('hotkey', 'proxy')
+        # Seconds added to every measured response time before it becomes order delay, so a local run can stand in
+        # for a miner whose replies take longer on the real network (network round trip, decompression).
+        self.latency_s = float(launcher_config['proxy'].get('latency_s', 0.0))
         self.check_config(self.config)
         config_file = launcher_config['proxy']['simulation_xml']
         if not os.path.isabs(config_file):
@@ -102,11 +108,17 @@ class Proxy(Validator):
             if agent in ['start_port', 'path']:
                 continue
             for agent_config in agent_configs:
-                base_agent_name = f"{agent}_{'_'.join(list([str(a) for a in agent_config['params'].values()]))}"
+                # An agent key may name a file in a subfolder of the agents path (e.g. "Agent_10_23/MyAgent10_23_Comment");
+                # the agent is known by its file name.
+                base_agent_name = f"{agent.rsplit('/', 1)[-1]}_{'_'.join(list([str(a) for a in agent_config['params'].values()]))}"
                 for i in range(agent_config['count']):
                     agent_name = f"{base_agent_name}_{i}"
                     self.agent_urls[agent_name] = f"http://127.0.0.1:{port}/handle"
                     port += 1
+
+        from state_recorder import make_recorder
+        self.recorder = make_recorder(launcher_config['proxy'].get('record_states'), self.simulator_config_file,
+                                      list(self.agent_urls), self.config.neuron.timeout)
 
         self.compressing = False
         self.start_time = None
@@ -198,7 +210,7 @@ class Proxy(Validator):
     async def handle_state(self, message : dict, state : MarketSimulationStateUpdate, receive_start : int) -> dict:
         time.time()
         state.version = __spec_version__
-        state.dendrite.hotkey = 'proxy'
+        state.dendrite.hotkey = self.validator_hotkey
         if not self.start_time:
             self.start_time = time.time()
             self.start_timestamp = state.timestamp
@@ -211,6 +223,9 @@ class Proxy(Validator):
             state.config.simulation_id = os.path.basename(state.config.logDir)[:13]
             state.config.logDir = None
         self.step += 1
+        # The validator writes every book's latest fundamental into the state before it goes to miners
+        # (engines/simulation.py, _carry_fundamental); without the same step agents would never see it locally.
+        self._carry_fundamental(state)
         bt.logging.debug(f"STATE : {state}")
 
         # GenTRX: save state to S3 + deliver assignments to agents
@@ -219,12 +234,13 @@ class Proxy(Validator):
             await self._gentrx.poll_and_deliver()
 
         # Forward state to agents
-        async def query_agent(uid, agent, url, session, json):
+        async def query_agent(uid, agent, url, session, body):
             response_time = None
             try:
                 bt.logging.info(f"Querying {agent} at {url}...")
                 start = time.time()
-                async with session.post(url=url, json=json, timeout=self.config.neuron.timeout) as r:
+                async with session.post(url=url, data=body, headers={'Content-Type': 'application/json'},
+                                        timeout=self.config.neuron.timeout) as r:
                     response = await r.json()
                     response_time = time.time() - start
                     # Bounded: a rejected body comes back with the whole request echoed inside it,
@@ -245,14 +261,22 @@ class Proxy(Validator):
                 return uid, agent, None, response_time
 
         serialized_config = state.config.model_dump(mode='json')
-        def create_agent_json(uid):
-            return state.model_copy(update={
+        # The books are the same for every agent and nearly all of the body, so they are dumped and encoded once and
+        # each agent's own accounts and notices are spliced in front: per agent the whole state used to be dumped and
+        # json-encoded again (0.74 s for 16 agents against 0.03 s, identical bodies).
+        shared = state.model_copy(update={"accounts": {}, "notices": {}, "config": serialized_config}).model_dump(mode='json', warnings=False)
+        shared.pop("accounts", None)
+        shared.pop("notices", None)
+        shared_body = msgspec.json.encode(shared)
+        def create_agent_body(uid):
+            own = state.model_copy(update={
+                "books": {},
                 "accounts": {uid: state.accounts[uid]},
                 "notices": {uid: state.notices[uid]},
-                "config" : serialized_config
-            }).model_dump(mode='json', warnings=False)
+            }).model_dump(mode='json', warnings=False, include={"accounts", "notices"})
+            return msgspec.json.encode(own)[:-1] + b"," + shared_body[1:]
         async with aiohttp.ClientSession() as session:
-            responses = await asyncio.gather(*(query_agent(uid, agent, agent_url, session, create_agent_json(uid)) for uid, (agent, agent_url) in enumerate(self.agent_urls.items())))
+            responses = await asyncio.gather(*(query_agent(uid, agent, agent_url, session, create_agent_body(uid)) for uid, (agent, agent_url) in enumerate(self.agent_urls.items())))
         responses = {uid : (response, agent, response_time) for uid, agent, response, response_time in responses}
         synapse_responses = {}
         for uid, (response, agent, response_time) in responses.items():
@@ -260,7 +284,7 @@ class Proxy(Validator):
                 try:
                     agent_response = FinanceAgentResponse.model_validate(response)
                     synapse = state.model_copy(update={"response":agent_response})
-                    synapse.dendrite.process_time = response_time
+                    synapse.dendrite.process_time = response_time + self.latency_s
                     synapse_responses[uid] = synapse
                 except Exception as e:
                     bt.logging.error(f"{agent} | Failed to validate response : {e}")
@@ -270,6 +294,31 @@ class Proxy(Validator):
         asyncio.create_task(_push_proxy_state(state, state.timestamp // block_time_ns))
         bt.logging.info(f"State update handled ({time.time()-receive_start}s)")
         return simulator_response
+
+    def _carry_fundamental(self, state) -> None:
+        """Writes each book's latest fundamental, the last row of the simulator's fundamental CSVs, into the state.
+
+        A multi-asset run writes one set of files per realization directory under the run root, which is what a
+        flattened state carries as `logDir`; a single-market run writes them into `logDir` itself. A row still being
+        written leaves its books on the values read before.
+        """
+        log_dir = getattr(self.simulation, 'logDir', None)
+        if not log_dir or not state.books:
+            return
+        prices = getattr(self, '_fundamental_prices', {})
+        files = sorted(Path(log_dir).glob('fundamental.*.csv')) + sorted(Path(log_dir).glob('*/fundamental.*.csv'))
+        for file in files:
+            try:
+                first_line, last_line = _read_first_and_last_nonempty(str(file))
+                book_ids = [int(col) for col in first_line.strip().split(',')[:-1]]
+                values = (last_line or '').strip().split(',')
+                if last_line is None or last_line.strip() == first_line.strip() or len(values) != len(book_ids) + 1:
+                    continue
+                prices.update({book_id: float(value) for book_id, value in zip(book_ids, values[:-1])})
+            except Exception as ex:
+                bt.logging.warning(f"Could not read fundamental prices from {file}: {ex}")
+        self._fundamental_prices = prices
+        stamp_fundamental(state.books, prices)
 
     async def _deliver_gentrx_assignments(self, assignments: dict) -> None:
         """Deliver GenTRX assignments to agents via HTTP POST."""
@@ -314,6 +363,8 @@ class Proxy(Validator):
                     if packed_data is not None or attempt >= 5:
                         shm_req.close_fd()
             bt.logging.info(f"Retrieved State Update ({time.time() - receive_start}s)")
+            if self.recorder is not None:
+                self.recorder.put(packed_data)
             start = time.time()
             result = None
             for attempt in range(1, 6):

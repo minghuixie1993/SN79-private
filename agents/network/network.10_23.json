@@ -1,0 +1,85 @@
+{
+    "name": "net3x64_10_23",
+    "minutes": 30,
+    "simulation_xml": "simulate/trading/run/config/multiasset_simulation_64.xml",
+    "taosim_bin": "simulate/trading/build/src/cpp/taosim",
+    "timeout": 5,
+    "proxy_port": 8100,
+    "agent_port": 9100,
+    "validators": [
+        {
+            "name": "validator_a",
+            "seed": 1001
+        },
+        {
+            "name": "validator_b",
+            "seed": 2002
+        }
+    ],
+    "agents": [
+        {
+            "file": "ArbitrageAgent"
+        },
+        {
+            "file": "FuturesAgent"
+        },
+        {
+            "file": "MyAgentVInput"
+        },
+        {
+            "file": "MyAgentGpt"
+        },
+        {
+            "file": "MyAgentVOrigin"
+        },
+        {
+            "file": "MyAgentV2"
+        },
+        {
+            "file": "MyAgentV3"
+        },
+        {
+            "file": "MyAgentVValidator"
+        },
+        {
+            "file": "MyAgentVComment"
+        },
+        {
+            "file": "MyAgentVSimples"
+        },
+        {
+            "file": "OrderOptionAgent"
+        },
+        {
+            "file": "RandomMakerAgent"
+        },
+        {
+            "file": "RandomTakerAgent"
+        },
+        {
+            "file": "RevengAgent"
+        },
+        {
+            "file": "SLTPAgent"
+        },
+        {
+            "file": "SelfTradingAgent"
+        },
+        {
+            "file": "Agent_10_23/MyAgent10_23IOV"
+        },
+        {
+            "file": "Agent_10_23/MyAgent10_23_Comment"
+        },
+        {
+            "file": "Agent_10_23/MyAgent10_23_Gpt"
+        }
+    ],
+    "common_params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false"
+    },
+    "agent_params": {},
+    "min_available_mb": 6000,
+    "stall_minutes": 10
+}

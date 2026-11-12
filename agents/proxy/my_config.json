@@ -1,0 +1,29 @@
+{
+    "proxy": {
+        "port": 8000,
+        "simulation_xml": "../../simulate/trading/run/config/multiasset_simulation_0.xml",
+        "timeout": 5
+    },
+    "agents": {
+        "path": "..",
+        "start_port": 8888,
+        "MyAgentVInput": [
+            {
+                "params": {
+                    "quantity": 1.0,
+                    "half_spread": 0.0005,
+                    "skew": 0.002,
+                    "requote_threshold": 0.0005,
+                    "max_fee_rate": 0.005,
+                    "expiry_period": 200000000000,
+                    "lazy_load": 1
+                },
+                "count": 1
+            }
+        ]
+    },
+    "taosim": {
+        "bin": "/home/Trustvs/workspace/sn-79/simulate/trading/build/src/cpp/taosim",
+        "delay": 5
+    }
+}

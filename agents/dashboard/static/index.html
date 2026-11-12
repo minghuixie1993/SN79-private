@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SN79 Local Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb; --surface-2: #f0efec;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --accent: #2a78d6; --mine: rgba(42,120,214,0.10); --good: #006300; --bad: #d03b3b;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #232322;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --accent: #3987e5; --mine: rgba(57,135,229,0.14); --good: #0ca30c; --bad: #e66767;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #232322;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --accent: #3987e5; --mine: rgba(57,135,229,0.14); --good: #0ca30c; --bad: #e66767;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--text-primary);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { display: flex; align-items: center; gap: 16px; padding: 10px 20px; background: var(--surface-1);
+  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+header .brand { font-weight: 600; }
+header nav { color: var(--text-secondary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+header nav a { color: var(--text-secondary); text-decoration: none; }
+header nav a:hover { color: var(--text-primary); }
+main { padding: 16px 20px 40px; max-width: 1600px; margin: 0 auto; }
+a { color: var(--accent); }
+.panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; min-width: 0; }
+.panel h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+.row { display: flex; gap: 16px; flex-wrap: wrap; }
+.row > .panel { flex: 1 1 420px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+.tile .label { color: var(--muted); font-size: 12px; }
+.tile .value { font-size: 22px; font-weight: 600; margin-top: 2px; }
+.tile .sub { color: var(--text-secondary); font-size: 12px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--grid); }
+th { color: var(--muted); font-weight: 500; font-size: 12px; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface-1); }
+th:hover { color: var(--text-primary); }
+th.sorted::after { content: " ▾"; } th.sorted.asc::after { content: " ▴"; }
+td.l, th.l { text-align: left; }
+tbody tr:hover { background: var(--surface-2); }
+tr.mine { background: var(--mine); }
+tr.click { cursor: pointer; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; border: 1px solid var(--border); color: var(--text-secondary); }
+.badge.live { color: var(--good); border-color: currentColor; }
+.badge.warn { color: var(--s4); border-color: currentColor; }
+.badge.bad { color: var(--bad); border-color: currentColor; }
+pre.err { background: var(--surface-2); padding: 8px 10px; border-radius: 6px; font-size: 12px; margin: 6px 0 0; white-space: pre-wrap; word-break: break-all; }
+.muted { color: var(--muted); }
+.neg { color: var(--bad); }
+.pos { color: var(--good); }
+button, select { font: inherit; color: var(--text-primary); background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.progress { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; width: 160px; display: inline-block; vertical-align: middle; }
+.progress > div { height: 100%; background: var(--accent); }
+.chart-box { position: relative; height: 280px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; background: var(--c); vertical-align: -1px; }
+.picker { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--text-secondary); max-height: 92px; overflow-y: auto; }
+.picker label { cursor: pointer; }
+pre.log { background: var(--surface-2); padding: 10px; border-radius: 6px; max-height: 420px; overflow: auto; font-size: 12px; margin: 0; white-space: pre-wrap; word-break: break-all; }
+.note { color: var(--text-secondary); font-size: 12px; margin: 6px 0 0; }
+@media (max-width: 640px) {
+  header, main { padding-left: 16px; padding-right: 16px; }
+  .row > .panel { flex-basis: 100%; }
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">SN79 local</span>
+  <nav id="crumbs"></nav>
+  <button id="theme" title="Toggle light / dark">Theme</button>
+</header>
+<main id="app"><p class="muted">Loading…</p></main>
+
+<script>
+const $app = document.getElementById("app");
+const $crumbs = document.getElementById("crumbs");
+const charts = [];
+let refreshTimer = null;
+const state = { sort: { key: "median", asc: false }, tab: "overall", picked: null, timelineValidator: null,
+                timelineMetric: "trading_score", bookValidator: null, bookMetric: "volume" };
+
+// ---------- theme ----------
+document.getElementById("theme").onclick = () => {
+  const dark = getComputedStyle(document.documentElement).colorScheme === "dark";
+  document.documentElement.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", document.documentElement.dataset.theme); } catch (e) {}
+  route();
+};
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const series = i => css(`--s${(i % 8) + 1}`);
+
+// ---------- helpers ----------
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function num(v, d = 3) {
+  if (v === null || v === undefined || Number.isNaN(v)) return '<span class="muted">–</span>';
+  const a = Math.abs(v);
+  if (a >= 1e6) return (v / 1e6).toFixed(2) + "M";
+  if (a >= 1e4) return (v / 1e3).toFixed(1) + "k";
+  if (Number.isInteger(v)) return String(v);
+  return v.toFixed(a >= 100 ? 1 : d);
+}
+const signed = (v, d) => v === null || v === undefined ? num(v) : `<span class="${v < 0 ? "neg" : ""}">${num(v, d)}</span>`;
+const shortName = a => String(a).split("/").pop();
+// simulation seconds as minutes after the grace period, never below zero
+const afterGrace = (s, v, d = 1) => Math.max(0, (s - (v.grace_s ?? 600)) / 60).toFixed(d);
+const noChart = () => typeof Chart === "undefined";
+const NO_CHART = `<p class="muted">Charts need Chart.js from cdnjs.cloudflare.com, which this browser could not load.</p>`;
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) {
+    const text = await r.text();
+    let detail = text;
+    try { detail = JSON.parse(text).detail ?? text; } catch (e) {}
+    throw new Error(detail || r.statusText);
+  }
+  return r.json();
+}
+function clearCharts() { while (charts.length) charts.pop().destroy(); }
+function ago(t) {
+  const s = Date.now() / 1000 - t;
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 86400) return `${(s / 3600).toFixed(1)} h ago`;
+  return `${(s / 86400).toFixed(1)} d ago`;
+}
+function sortable(table, rows, columns, render) {
+  const head = table.querySelector("thead tr");
+  head.innerHTML = columns.map(c => `<th class="${c.l ? "l" : ""} ${state.sort.key === c.key ? "sorted" + (state.sort.asc ? " asc" : "") : ""}" data-k="${c.key}">${c.title}</th>`).join("");
+  head.querySelectorAll("th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    state.sort = { key: k, asc: state.sort.key === k ? !state.sort.asc : false };
+    sortable(table, rows, columns, render);
+  });
+  const col = columns.find(c => c.key === state.sort.key) || columns[0];
+  const val = r => col.get ? col.get(r) : r[col.key];
+  const sorted = [...rows].sort((a, b) => {
+    const x = val(a), y = val(b);
+    if (x === y) return 0;
+    if (x === null || x === undefined) return 1;
+    if (y === null || y === undefined) return -1;
+    return (x < y ? -1 : 1) * (state.sort.asc ? 1 : -1);
+  });
+  table.querySelector("tbody").innerHTML = sorted.map(render).join("");
+}
+function lineChart(canvas, datasets, { yTitle = "", xTitle = "sim minutes after grace" } = {}) {
+  const grid = css("--grid"), muted = css("--muted");
+  const chart = new Chart(canvas, {
+    type: "line",
+    data: { datasets: datasets.map(d => ({ ...d, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4,
+      pointHoverBorderWidth: 2, pointHoverBorderColor: css("--surface-1"), tension: 0, spanGaps: true,
+      backgroundColor: d.borderColor })) },
+    options: {
+      animation: false, responsive: true, maintainAspectRatio: false, parsing: false, normalized: true,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false },
+        tooltip: { itemSort: (a, b) => b.parsed.y - a.parsed.y,
+          callbacks: { title: items => `${items[0].parsed.x.toFixed(1)} min`,
+                       label: i => ` ${i.dataset.label}: ${Number(i.parsed.y).toPrecision(4)}` } } },
+      scales: {
+        x: { type: "linear", title: { display: !!xTitle, text: xTitle, color: muted }, grid: { color: grid }, ticks: { color: muted }, border: { color: css("--axis") } },
+        y: { title: { display: !!yTitle, text: yTitle, color: muted }, grid: { color: grid }, ticks: { color: muted }, border: { display: false } } } }
+  });
+  charts.push(chart);
+  return chart;
+}
+function legendHtml(datasets) {
+  return datasets.map(d => `<span style="--c:${d.borderColor}">${esc(d.label)}</span>`).join("");
+}
+
+// ---------- router ----------
+function refreshSoon(ms) {
+  refreshTimer = setTimeout(() => {
+    if (document.activeElement?.tagName === "SELECT") return refreshSoon(ms);
+    const y = window.scrollY;
+    route().then(() => window.scrollTo(0, y));
+  }, ms);
+}
+async function route() {
+  clearTimeout(refreshTimer);
+  const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean).map(decodeURIComponent);
+  try {
+    if (parts[0] === "run" && parts[2] === "agent") await agentPage(parts[1], Number(parts[3]));
+    else if (parts[0] === "run") await runPage(parts[1]);
+    else await runsPage();
+  } catch (e) {
+    $crumbs.innerHTML = `<a href="#/">Runs</a>`;
+    const gone = /^no run /.test(e.message);
+    $app.innerHTML = `<div class="panel"><b>${gone ? "Run not found" : "Error"}</b><p class="muted">${esc(e.message)}${gone
+      ? " — its folder is no longer under agents/data/network (deleted or renamed)." : ""}</p><a href="#/">Back to runs</a></div>`;
+  }
+}
+window.addEventListener("hashchange", () => { state.picked = null; state.slots = {}; route(); });
+
+// ---------- runs ----------
+async function runsPage() {
+  $crumbs.innerHTML = `<a href="#/">Runs</a>`;
+  clearCharts();
+  const runs = await api("/api/runs");
+  const stopped = r => !r.running && r.validators.some(v => v.sim_s < v.target_s);
+  const status = r => r.running ? `<span class="badge live">running</span>`
+    : r.scoring ? `<span class="badge warn">scoring</span>`
+    : r.scoring_failed ? `<span class="badge bad">scoring failed</span>`
+    : r.scores === "final" ? `<span class="badge">scored</span>`
+    : r.scores === "live" ? `<span class="badge warn">partial score</span>`
+    : stopped(r) ? `<span class="badge bad">stopped early</span>` : `<span class="badge">not scored</span>`;
+  const prog = r => {
+    if (!r.validators.length) return '<span class="muted">–</span>';
+    const done = Math.min(...r.validators.map(v => v.sim_s)), v0 = r.validators[0];
+    return `<span class="progress"><div style="width:${Math.min(100, 100 * done / v0.target_s)}%"></div></span> <span class="muted">${afterGrace(done, v0)} / ${afterGrace(v0.target_s, v0, 0)} min</span>`;
+  };
+  $app.innerHTML = `<div class="panel"><h2>Network runs</h2><div class="table-wrap"><table>
+    <thead><tr><th class="l">Run</th><th class="l">Status</th><th class="l">Sim progress</th><th class="l">Layout</th>
+    <th>Validators</th><th>Agents</th><th class="l">Leader (median trading score)</th><th>Created</th></tr></thead><tbody>
+    ${runs.map(r => `<tr class="click" onclick="location.hash='#/run/${encodeURIComponent(r.name)}'">
+      <td class="l"><a href="#/run/${encodeURIComponent(r.name)}">${esc(r.name)}</a></td><td class="l">${status(r)}</td>
+      <td class="l">${prog(r)}</td><td class="l muted">${esc(r.layout)}</td><td>${r.validators.length}</td><td>${r.agents}</td>
+      <td class="l">${r.leader ? `${esc(shortName(r.leader.agent))} <span class="muted">${num(r.leader.median)}</span>` : '<span class="muted">–</span>'}</td>
+      <td class="muted">${ago(r.created)}</td></tr>`).join("") || `<tr><td class="l muted" colspan="8">No runs under agents/data/network yet. Start one with agents/network/run_network.py.</td></tr>`}
+    </tbody></table></div></div>`;
+  if (runs.some(r => r.running || r.scoring)) refreshSoon(10000);
+}
+
+// ---------- run ----------
+async function runPage(name) {
+  const run = await api(`/api/runs/${encodeURIComponent(name)}`);
+  $crumbs.innerHTML = `<a href="#/">Runs</a> / ${esc(name)}`;
+  clearCharts();
+  const sc = run.scores, rows = sc.combined, vnames = run.validators.map(v => v.name);
+  const running = run.validators.some(v => v.live), scoring = run.scoring.length > 0;
+  const validatorsHtml = run.validators.map(v => `<div>${esc(v.name)} <span class="muted">seed ${v.seed}</span>
+      <span class="progress"><div style="width:${Math.min(100, 100 * v.sim_s / v.target_s)}%"></div></span>
+      <span class="muted">${afterGrace(v.sim_s, v)} / ${afterGrace(v.target_s, v, 0)} min after grace</span>
+      ${v.live ? '<span class="badge live">live</span>' : ""}</div>`).join("");
+  const sourceHtml = sc.source === "final" ? `<span class="badge">final scores</span> <span class="muted">window ${esc(sc.window)}</span>`
+    : sc.source === "live" ? `<span class="badge warn">partial scores</span> <span class="muted">window ${esc(sc.window)} — press Score now to refresh</span>`
+    : `<span class="muted">No scores yet.</span>`;
+  const scoringHtml = scoring ? `<span class="badge warn">scoring ${run.scoring.map(s => esc(s.validator)).join(", ")}…</span>` : "";
+  const failedHtml = (run.scoring_failed || []).map(f => `<div style="margin-top:8px"><span class="badge bad">${f.kind === "live" ? "Score now" : "Rescore"} failed on ${esc(f.validator)} (exit ${f.code})</span>
+      <span class="muted">${esc(f.log)}</span><pre class="err">${esc(f.tail) || "(empty log)"}</pre></div>`).join("");
+  const classes = sc.classes || [];
+  $app.innerHTML = `
+    <div class="row">
+      <div class="panel"><h2>Run</h2>
+        <div>${esc(run.layout)} · ${run.agents.length} agents · ${run.validators.length} validators · ${run.minutes} sim min</div>
+        <div style="margin-top:8px">${validatorsHtml}</div></div>
+      <div class="panel"><h2>Scores</h2><div>${sourceHtml} ${scoringHtml}</div>${failedHtml}
+        <div class="toolbar" style="margin-top:10px">
+          <button id="score-live" ${scoring ? "disabled" : ""} title="Replay the recording so far into score_live/">Score now</button>
+          <button id="score-final" ${scoring || running ? "disabled" : ""} title="Replay the whole recording into score/ again (adds charts to runs scored before timelines existed)">Rescore</button>
+        </div>
+        <p class="note">Ranked by the de-beta trading score averaged over every 5 s scoring boundary, median across validators
+        (a stand-in for the network's stake-weighted consensus). "Score" is the validator's weight input after the 3 h track-record EMA,
+        so short runs mostly reward an early start. A replay takes a few minutes per validator and runs at the lowest CPU priority.</p></div>
+    </div>
+    ${rows.length ? `
+    <div class="panel"><h2>Agents</h2>
+      <div class="toolbar"><div class="tabs" id="tabs">
+        <button data-t="overall">Overall</button>${classes.map(c => `<button data-t="${esc(c.name)}">${esc(c.name)} <span class="muted">${c.books} books</span></button>`).join("")}
+      </div></div>
+      <div class="table-wrap"><table id="board"><thead><tr></tr></thead><tbody></tbody></table></div>
+      <p class="note">Highlighted rows are MyAgent* files. Click a row for the agent's page.</p></div>
+    <div class="panel"><h2>Over time</h2><div id="timeline"><p class="muted">Loading…</p></div></div>` : ""}`;
+  document.getElementById("score-live").onclick = () => startScore(name, "live");
+  document.getElementById("score-final").onclick = () => startScore(name, "final");
+  if (rows.length) {
+    document.querySelectorAll("#tabs button").forEach(b => {
+      b.classList.toggle("on", b.dataset.t === state.tab);
+      b.onclick = () => { state.tab = b.dataset.t; runPage(name); };
+    });
+    if (state.tab !== "overall" && !classes.some(c => c.name === state.tab)) state.tab = "overall";
+    renderBoard(name, rows, vnames, classes);
+    await renderTimeline(name, run, rows).catch(e => {
+      document.getElementById("timeline").innerHTML = `<p class="muted">${esc(e.message)}</p>`; });
+  }
+  if (running || scoring) refreshSoon(15000);
+}
+
+async function startScore(name, mode) {
+  try { await api(`/api/runs/${encodeURIComponent(name)}/score?mode=${mode}`, { method: "POST" }); }
+  catch (e) { alert(e.message); }
+  route();
+}
+
+function renderBoard(name, rows, vnames, classes) {
+  const table = document.getElementById("board");
+  let columns;
+  const median = (r, f) => {
+    const v = Object.values(r.validators).map(f).filter(x => typeof x === "number").sort((a, b) => a - b);
+    return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null;
+  };
+  if (state.tab === "overall") {
+    columns = [
+      { key: "rank", title: "#" }, { key: "uid", title: "UID" }, { key: "agent", title: "Agent", l: true },
+      { key: "median", title: "Trading (median)" },
+      ...vnames.map(v => ({ key: "v_" + v, title: v.replace("validator_", "val "), get: r => r.validators[v]?.trading })),
+      { key: "score", title: "Score (EMA)" }, { key: "making", title: "Making" }, { key: "making_share", title: "Make share" },
+      { key: "s3", title: "S3" }, { key: "skill", title: "Skill" }, { key: "net_alpha", title: "Net alpha" },
+      { key: "skill_books", title: "Skill books" }, { key: "notional", title: "Notional" }, { key: "pnl", title: "PnL" }];
+    sortable(table, rows, columns, r => `<tr class="click ${r.mine ? "mine" : ""}" onclick="location.hash='#/run/${encodeURIComponent(name)}/agent/${r.uid}'">
+      <td>${r.rank}</td><td>${r.uid}</td><td class="l">${esc(shortName(r.agent))}</td><td><b>${num(r.median)}</b></td>
+      ${vnames.map(v => `<td>${num(r.validators[v]?.trading)}</td>`).join("")}
+      <td>${num(r.score)}</td><td>${num(r.making)}</td><td>${num(r.making_share)}</td><td>${num(r.s3)}</td>
+      <td>${num(r.skill)}</td><td>${signed(r.net_alpha, 1)}</td><td>${num(r.skill_books)}</td><td>${num(r.notional)}</td><td>${signed(r.pnl, 1)}</td></tr>`);
+  } else {
+    const c = state.tab;
+    const get = k => r => median(r, v => v.classes?.[c]?.[k]);
+    columns = [
+      { key: "rank", title: "#" }, { key: "uid", title: "UID" }, { key: "agent", title: "Agent", l: true },
+      { key: "median", title: "Trading (overall)" },
+      { key: "c_making", title: "Making", get: get("making") }, { key: "c_s3", title: "S3", get: get("s3") },
+      { key: "c_skill", title: "Skill", get: get("skill") }, { key: "c_skill_books", title: "Skill books", get: get("skill_books") },
+      { key: "c_cov", title: "Coverage books", get: get("coverage_books") },
+      { key: "c_traded", title: "Books traded", get: get("books_traded") }, { key: "c_pos", title: "Books +PnL", get: get("books_positive") },
+      { key: "c_volume", title: "Volume", get: get("volume") }];
+    sortable(table, rows, columns, r => `<tr class="click ${r.mine ? "mine" : ""}" onclick="location.hash='#/run/${encodeURIComponent(name)}/agent/${r.uid}'">
+      <td>${r.rank}</td><td>${r.uid}</td><td class="l">${esc(shortName(r.agent))}</td><td>${num(r.median)}</td>
+      ${columns.slice(4).map(col => `<td>${num(col.get(r))}</td>`).join("")}</tr>`);
+  }
+}
+
+async function renderTimeline(name, run, rows) {
+  const box = document.getElementById("timeline");
+  if (!run.scores.has_timelines) {
+    box.innerHTML = `<p class="muted">These scores were made before per-agent timelines were recorded. Press Rescore (or Score now while running) to add the charts.</p>`;
+    return;
+  }
+  if (noChart()) { box.innerHTML = NO_CHART; return; }
+  const data = await api(`/api/runs/${encodeURIComponent(name)}/timelines`);
+  const vnames = Object.keys(data).filter(v => data[v]);
+  if (!vnames.length) { box.innerHTML = `<p class="muted">No timelines.</p>`; return; }
+  if (!vnames.includes(state.timelineValidator)) state.timelineValidator = vnames[0];
+  if (!state.picked) {
+    // default: my agents first, then the leaders, at most 8 series (the palette's categorical slots)
+    const mine = rows.filter(r => r.mine).map(r => r.uid);
+    const top = rows.map(r => r.uid).filter(u => !mine.includes(u));
+    state.picked = [...mine, ...top].slice(0, Math.max(4, Math.min(8, mine.length + 3))).slice(0, 8);
+  }
+  const keys = data[state.timelineValidator].keys;
+  const metrics = [["trading_score", "Trading score"], ["score", "Score (EMA)"], ["making_raw", "Making"], ["making_share", "Make share"],
+                   ["skill_raw", "Skill"], ["skill_net_alpha", "Net alpha"], ["notional", "Notional"], ["pnl", "PnL"]].filter(([k]) => keys.includes(k));
+  box.innerHTML = `<div class="toolbar">
+      <select id="tl-v">${vnames.map(v => `<option ${v === state.timelineValidator ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>
+      <select id="tl-m">${metrics.map(([k, t]) => `<option value="${k}" ${k === state.timelineMetric ? "selected" : ""}>${t}</option>`).join("")}</select>
+      <span class="muted">up to 8 agents</span></div>
+    <div class="picker" id="tl-pick">${rows.map(r => `<label><input type="checkbox" value="${r.uid}" ${state.picked.includes(r.uid) ? "checked" : ""}> ${esc(shortName(r.agent))}</label>`).join("")}</div>
+    <div class="chart-box" style="margin-top:10px"><canvas id="tl-c"></canvas></div><div class="legend" id="tl-l"></div>`;
+  document.getElementById("tl-v").onchange = e => { state.timelineValidator = e.target.value; renderTimeline(name, run, rows); };
+  document.getElementById("tl-m").onchange = e => { state.timelineMetric = e.target.value; renderTimeline(name, run, rows); };
+  document.querySelectorAll("#tl-pick input").forEach(i => i.onchange = () => {
+    const uid = Number(i.value);
+    if (i.checked) { if (state.picked.length >= 8) { i.checked = false; return; } state.picked.push(uid); }
+    else state.picked = state.picked.filter(u => u !== uid);
+    renderTimeline(name, run, rows);
+  });
+  const d = data[state.timelineValidator], ti = keys.indexOf("timestamp"), mi = keys.indexOf(state.timelineMetric);
+  const grace = d.grace_period || 600e9;
+  // each picked agent keeps its slot while picked, so a change of selection never repaints the others
+  state.slots = Object.fromEntries(Object.entries(state.slots || {}).filter(([u]) => state.picked.includes(Number(u))));
+  for (const uid of state.picked) {
+    if (state.slots[uid] === undefined) {
+      const used = new Set(Object.values(state.slots));
+      state.slots[uid] = [0, 1, 2, 3, 4, 5, 6, 7].find(s => !used.has(s));
+    }
+  }
+  const datasets = state.picked.map(uid => ({
+    label: shortName(rows.find(r => r.uid === uid)?.agent ?? uid), borderColor: series(state.slots[uid]),
+    data: (d.agents[String(uid)] || []).map(row => ({ x: (row[ti] - grace) / 60e9, y: row[mi] })).filter(p => p.y !== null) }));
+  charts.filter(c => c.canvas.id === "tl-c").forEach(c => { c.destroy(); charts.splice(charts.indexOf(c), 1); });
+  lineChart(document.getElementById("tl-c"), datasets);
+  document.getElementById("tl-l").innerHTML = legendHtml(datasets);
+}
+
+// ---------- agent ----------
+async function agentPage(name, uid) {
+  const [run, ag] = await Promise.all([api(`/api/runs/${encodeURIComponent(name)}`), api(`/api/runs/${encodeURIComponent(name)}/agents/${uid}`)]);
+  $crumbs.innerHTML = `<a href="#/">Runs</a> / <a href="#/run/${encodeURIComponent(name)}">${esc(name)}</a> / ${esc(shortName(ag.agent.file))}`;
+  clearCharts();
+  const combined = run.scores.combined.find(r => r.uid === uid) || {};
+  const vnames = Object.keys(ag.validators).filter(v => ag.validators[v]);
+  const vrow = v => ({ ...(ag.validators[v]?.row || {}), rank: combined.validators?.[v]?.rank });
+  const params = Object.entries(ag.agent.params || {}).filter(([k]) => !["lazy_load", "gtx_enabled"].includes(k));
+  const tile = (label, value, sub = "") => `<div class="tile"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`;
+  $app.innerHTML = `
+    <div class="panel"><h2>${esc(ag.agent.file)} <span class="muted">uid ${uid}</span></h2>
+      <div class="muted">${params.length ? params.map(([k, v]) => `${esc(k)}=${esc(v)}`).join(" · ") : "default params"}</div></div>
+    ${run.scores.combined.length ? `
+    <div class="tiles">
+      ${tile("Rank", combined.rank ? `${combined.rank} / ${run.scores.combined.length}` : "–", "by median trading score")}
+      ${tile("Trading (median)", num(combined.median), `mean ${num(combined.mean)}`)}
+      ${tile("Score (EMA)", num(combined.score), "validator weight input")}
+      ${tile("Making", num(combined.making), `share ${num(combined.making_share)} · S3 ${num(combined.s3)}`)}
+      ${tile("Skill", num(combined.skill), `${num(combined.skill_books)} books`)}
+      ${tile("Net alpha", signed(combined.net_alpha, 1))}
+      ${tile("Notional", num(combined.notional))}
+      ${tile("PnL", signed(combined.pnl, 1))}
+    </div>
+    <div class="panel"><h2>Per validator</h2><div class="table-wrap"><table>
+      <thead><tr><th class="l">Validator</th><th>Rank</th><th>Trading</th><th>Score</th><th>Making</th><th>Captured</th><th>Realized</th>
+      <th>Make share</th><th>S3</th><th>P11</th><th>Skill</th><th>Net alpha</th><th>Skill books</th><th>Coverage</th><th>Notional</th><th>PnL</th></tr></thead>
+      <tbody>${vnames.map(v => { const r = vrow(v); return `<tr><td class="l">${esc(v)}</td><td>${r.rank ?? "–"}</td><td>${num(r.trading)}</td>
+        <td>${num(r.score)}</td><td>${num(r.making)}</td><td>${num(r.captured)}</td><td>${num(r.realized)}</td><td>${num(r.making_share)}</td>
+        <td>${num(r.s3)}</td><td>${num(r.p11)}</td><td>${num(r.skill)}</td><td>${signed(r.net_alpha, 1)}</td><td>${num(r.skill_books)}</td>
+        <td>${num(r.coverage_books)}</td><td>${num(r.notional)}</td><td>${signed(r.pnl, 1)}</td></tr>`; }).join("")}</tbody></table></div></div>
+    <div class="panel"><h2>Asset classes</h2><div class="table-wrap"><table>
+      <thead><tr><th class="l">Class</th><th class="l">Validator</th><th>Books</th><th>Traded</th><th>+PnL</th><th>Volume</th>
+      <th>Making</th><th>S3</th><th>Skill</th><th>Skill books</th><th>Coverage</th></tr></thead>
+      <tbody>${(run.scores.classes || []).map(c => vnames.map((v, i) => { const k = vrow(v).classes?.[c.name] || {};
+        return `<tr><td class="l">${i === 0 ? `<b>${esc(c.name)}</b>` : ""}</td><td class="l muted">${esc(v)}</td><td>${num(k.books)}</td>
+        <td>${num(k.books_traded)}</td><td>${num(k.books_positive)}</td><td>${num(k.volume)}</td><td>${num(k.making)}</td><td>${num(k.s3)}</td>
+        <td>${num(k.skill)}</td><td>${num(k.skill_books)}</td><td>${num(k.coverage_books)}</td></tr>`; }).join("")).join("")
+        || `<tr><td class="l muted" colspan="11">Per-class detail needs a rescore (scores made before it was recorded).</td></tr>`}</tbody></table></div></div>
+    <div id="agent-charts"></div>
+    <div class="panel"><h2>Books</h2><div id="books"></div></div>` : `<div class="panel muted">No scores yet for this run.</div>`}
+    <div class="panel"><h2>Agent log (last 150 lines)</h2><pre class="log" id="log">Loading…</pre></div>`;
+  fetch(`/api/runs/${encodeURIComponent(name)}/agents/${uid}/log?lines=150`).then(r => r.text()).then(t => {
+    const el = document.getElementById("log"); el.textContent = t || "(empty)"; el.scrollTop = el.scrollHeight; });
+  if (!run.scores.combined.length) return;
+  renderBooks(ag, vnames, run.scores.classes || []);
+  if (run.scores.has_timelines && noChart()) document.getElementById("agent-charts").innerHTML = `<div class="panel">${NO_CHART}</div>`;
+  else if (run.scores.has_timelines) {
+    const data = await api(`/api/runs/${encodeURIComponent(name)}/timelines`);
+    const metrics = [["trading_score", "Trading score"], ["score", "Score (EMA)"], ["making_raw", "Making"], ["skill_raw", "Skill"],
+                     ["making_share", "Make share"], ["skill_net_alpha", "Net alpha"], ["notional", "Notional"], ["pnl", "PnL"]];
+    const box = document.getElementById("agent-charts");
+    box.innerHTML = `<div class="row">${metrics.map(([k, t], i) => `<div class="panel"><h2>${t}</h2>
+      <div class="chart-box" style="height:220px"><canvas id="ac-${i}"></canvas></div><div class="legend" id="al-${i}"></div></div>`).join("")}</div>`;
+    metrics.forEach(([k], i) => {
+      const datasets = Object.entries(data).filter(([, d]) => d && d.keys.includes(k)).map(([v, d], j) => {
+        const ti = d.keys.indexOf("timestamp"), mi = d.keys.indexOf(k), grace = d.grace_period || 600e9;
+        return { label: v, borderColor: series(j), data: (d.agents[String(uid)] || []).map(r => ({ x: (r[ti] - grace) / 60e9, y: r[mi] })).filter(p => p.y !== null) };
+      });
+      lineChart(document.getElementById(`ac-${i}`), datasets, { xTitle: "" });
+      document.getElementById(`al-${i}`).innerHTML = legendHtml(datasets);
+    });
+  }
+}
+
+function renderBooks(ag, vnames, classes) {
+  const box = document.getElementById("books");
+  if (!vnames.some(v => ag.validators[v]?.per_book)) {
+    box.innerHTML = `<p class="muted">Per-book detail needs a rescore (scores made before it was recorded).</p>`;
+    return;
+  }
+  if (noChart()) { box.innerHTML = NO_CHART; return; }
+  if (!vnames.includes(state.bookValidator)) state.bookValidator = vnames[0];
+  box.innerHTML = `<div class="toolbar">
+      <select id="bk-v">${vnames.map(v => `<option ${v === state.bookValidator ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>
+      <select id="bk-m"><option value="volume" ${state.bookMetric === "volume" ? "selected" : ""}>Volume (maker / taker)</option>
+        <option value="realized_pnl" ${state.bookMetric === "realized_pnl" ? "selected" : ""}>Realized PnL</option></select></div>
+    <div class="chart-box"><canvas id="bk-c"></canvas></div><div class="legend" id="bk-l"></div>`;
+  document.getElementById("bk-v").onchange = e => { state.bookValidator = e.target.value; rerender(); };
+  document.getElementById("bk-m").onchange = e => { state.bookMetric = e.target.value; rerender(); };
+  function rerender() { charts.filter(c => c.canvas.id === "bk-c").forEach(c => { c.destroy(); charts.splice(charts.indexOf(c), 1); }); renderBooks(ag, vnames, classes); }
+  const pb = ag.validators[state.bookValidator].per_book;
+  const books = Object.keys(pb.volume || pb.realized_pnl || {}).map(Number).sort((a, b) => a - b);
+  // class of each book from the class sizes, in layout order (books run consecutively across classes)
+  const classOf = {}; let start = 0;
+  classes.forEach((c, i) => { for (let b = start; b < start + c.books; b++) classOf[b] = i; start += c.books; });
+  const grid = css("--grid"), muted = css("--muted");
+  let datasets;
+  if (state.bookMetric === "volume") {
+    datasets = [
+      { label: "maker", data: books.map(b => pb.volume[b]?.maker ?? 0), backgroundColor: series(0) },
+      { label: "taker", data: books.map(b => pb.volume[b]?.taker ?? 0), backgroundColor: series(1) }];
+  } else {
+    datasets = [{ label: "realized PnL", data: books.map(b => pb.realized_pnl[b] ?? 0),
+      backgroundColor: books.map(b => (pb.realized_pnl[b] ?? 0) < 0 ? css("--bad") : series(0)) }];
+  }
+  const chart = new Chart(document.getElementById("bk-c"), {
+    type: "bar",
+    data: { labels: books, datasets: datasets.map(d => ({ ...d, borderRadius: 2, borderSkipped: "start", borderWidth: 0, categoryPercentage: 0.9, barPercentage: 0.9 })) },
+    options: { animation: false, responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { mode: "index", intersect: false, callbacks: {
+          title: i => `book ${i[0].label} · ${classes[classOf[i[0].label]]?.name ?? ""}`,
+          label: i => ` ${i.dataset.label}: ${Number(i.parsed.y).toFixed(2)}` } } },
+      scales: { x: { stacked: state.bookMetric === "volume", grid: { display: false }, ticks: { color: muted, autoSkip: true, maxRotation: 0 },
+                     title: { display: true, text: "book id" + (classes.length ? "  (" + classes.map(c => c.name).join(" | ") + ")" : ""), color: muted } },
+                y: { stacked: state.bookMetric === "volume", grid: { color: grid }, ticks: { color: muted }, border: { display: false } } } }
+  });
+  charts.push(chart);
+  document.getElementById("bk-l").innerHTML = state.bookMetric === "volume"
+    ? legendHtml(datasets.map(d => ({ label: d.label, borderColor: d.backgroundColor })))
+    : `<span style="--c:${series(0)}">gain</span><span style="--c:${css("--bad")}">loss</span>`;
+}
+
+route();
+</script>
+</body>
+</html>

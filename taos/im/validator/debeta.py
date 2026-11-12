@@ -655,7 +655,10 @@ def accumulate_book_capture(buy_sums, sell_sums, book_id, trades, W, *,
             st["pend"].append((st["n"], pt, t))
             # only fills with a miner on either side can earn or pay realized spread; background-on-background
             # prints shape the mid but never wait on the queue (it would otherwise hold the horizon's prints twice)
-            if real_buy_sums is not None and ((t.get("Ma") or -1) >= 0 or (t.get("Ta") or -1) >= 0):
+            # `t.get("Ma") or -1` read uid 0 as -1 (0 is falsy), so uid 0's fills never queued and its realized
+            # spread, and with it its making credit, was always 0; only a missing id may read as background.
+            ma, ta = t.get("Ma"), t.get("Ta")
+            if real_buy_sums is not None and ((ma is not None and ma >= 0) or (ta is not None and ta >= 0)):
                 st["rpend"].append((st["n"], pt, t))
         st["n"] += 1
     _finalize_ready(st, book_id, buy_sums, sell_sums, W, buy_hist, sell_hist, ts, _now, flush_ns, fee_weight=fee_weight)

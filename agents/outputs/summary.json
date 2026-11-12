@@ -1,0 +1,14 @@
+{
+  "agent_id": "",
+  "generated_at_utc": "2026-10-22T23:42:23Z",
+  "uptime_s": 0.0,
+  "orders_submitted": {},
+  "orders_total": 0,
+  "books_traded": [],
+  "params": {
+    "min_quantity": 0.1,
+    "max_quantity": 1.0,
+    "min_leverage": 0.0,
+    "max_leverage": 0.0
+  }
+}

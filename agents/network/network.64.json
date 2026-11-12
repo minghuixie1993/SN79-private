@@ -1,0 +1,35 @@
+{
+    "name": "net3x64",
+    "minutes": 30,
+    "simulation_xml": "simulate/trading/run/config/multiasset_simulation_64.xml",
+    "taosim_bin": "simulate/trading/build/src/cpp/taosim",
+    "timeout": 5,
+    "proxy_port": 8100,
+    "agent_port": 9100,
+    "validators": [
+        {
+            "name": "validator_a",
+            "seed": 1001
+        },
+        {
+            "name": "validator_b",
+            "seed": 2002
+        }
+    ],
+    "agents": "all",
+    "exclude": [
+        "HybridTrainingAgent",
+        "ImbalanceAgent",
+        "DevAgent",
+        "MovingHurstAgent",
+        "SimpleRegressorAgent",
+        "CustomTrainingAgent"
+    ],
+    "common_params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false"
+    },
+    "agent_params": {},
+    "min_available_mb": 6000,
+    "stall_minutes": 10
+}

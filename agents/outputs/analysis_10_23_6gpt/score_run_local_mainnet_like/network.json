@@ -1,0 +1,390 @@
+{
+  "config": {
+    "name": "mainnet_like",
+    "minutes": 60,
+    "simulation_xml": "simulate/trading/run/config/mainnet_064/multiasset_simulation_0.xml",
+    "taosim_bin": "simulate/trading/build/src/cpp/taosim-0.6.4",
+    "timeout": 3.0,
+    "latency_s": 0.67,
+    "proxy_port": 8100,
+    "agent_port": 9100,
+    "validators": [
+      {
+        "name": "validator_main",
+        "seed": 7901
+      }
+    ],
+    "agents": [
+      {
+        "file": "Agent_10_23/MyAgent10_23_1Gpt"
+      },
+      {
+        "file": "Agent_10_23/MyAgent10_23_2Gpt"
+      },
+      {
+        "file": "Agent_10_23/MyAgent10_23_3Gpt"
+      },
+      {
+        "file": "Agent_10_23/MyAgent10_23_Comment"
+      },
+      {
+        "file": "Agent_10_23/MyAgent10_23_CommentMk"
+      },
+      {
+        "file": "Agent_10_23/MyAgent10_23IOV"
+      },
+      {
+        "file": "Agent_10_23/MyAgent10_23IovC"
+      },
+      {
+        "file": "MyAgentV2"
+      },
+      {
+        "file": "MyAgentV3"
+      },
+      {
+        "file": "MyAgentVOrigin"
+      },
+      {
+        "file": "MyAgentVInput"
+      },
+      {
+        "file": "MyAgentVSimples"
+      },
+      {
+        "file": "MyAgentVValidator"
+      },
+      {
+        "file": "MyAgentGpt"
+      },
+      {
+        "file": "RandomMakerAgent"
+      },
+      {
+        "file": "mainnet_field/FieldTakerAgent",
+        "params": {
+          "seed": 1,
+          "rate_c0": 0.01,
+          "rate_c1": 0.012,
+          "edge_bps_c0": 1.0,
+          "notional": 1500
+        }
+      },
+      {
+        "file": "mainnet_field/FieldTakerAgent",
+        "params": {
+          "seed": 2,
+          "rate_c0": 0.01,
+          "rate_c1": 0.012,
+          "edge_bps_c0": 1.5,
+          "notional": 1200
+        }
+      },
+      {
+        "file": "mainnet_field/FieldTakerAgent",
+        "params": {
+          "seed": 3,
+          "rate_c0": 0.01,
+          "rate_c1": 0.012,
+          "edge_bps_c0": 2.0,
+          "notional": 1800
+        }
+      },
+      {
+        "file": "mainnet_field/FieldTakerAgent",
+        "params": {
+          "seed": 4,
+          "rate_c0": 0.01,
+          "rate_c1": 0.012,
+          "edge_bps_c0": 1.5,
+          "notional": 1000
+        }
+      },
+      {
+        "file": "mainnet_field/FieldTakerAgent",
+        "params": {
+          "seed": 5,
+          "rate_c0": 0.01,
+          "rate_c1": 0.012,
+          "edge_bps_c0": 2.5,
+          "notional": 1600
+        }
+      },
+      {
+        "file": "mainnet_field/FieldTakerAgent",
+        "params": {
+          "seed": 6,
+          "rate_c0": 0.01,
+          "rate_c1": 0.012,
+          "edge_bps_c0": 1.0,
+          "notional": 1300
+        }
+      }
+    ],
+    "common_params": {
+      "lazy_load": 1,
+      "gtx_enabled": "false",
+      "event_lookback_minutes": 1
+    },
+    "agent_params": {},
+    "min_available_mb": 6000,
+    "stall_minutes": 10
+  },
+  "minutes": 60.0,
+  "simulation_xml": "/home/Trustvs/workspace/sn-79/simulate/trading/run/config/mainnet_064/multiasset_simulation_0.xml",
+  "agents": [
+    {
+      "uid": 0,
+      "file": "Agent_10_23/MyAgent10_23_1Gpt",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9100
+    },
+    {
+      "uid": 1,
+      "file": "Agent_10_23/MyAgent10_23_2Gpt",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9101
+    },
+    {
+      "uid": 2,
+      "file": "Agent_10_23/MyAgent10_23_3Gpt",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9102
+    },
+    {
+      "uid": 3,
+      "file": "Agent_10_23/MyAgent10_23_Comment",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9103
+    },
+    {
+      "uid": 4,
+      "file": "Agent_10_23/MyAgent10_23_CommentMk",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9104
+    },
+    {
+      "uid": 5,
+      "file": "Agent_10_23/MyAgent10_23IOV",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9105
+    },
+    {
+      "uid": 6,
+      "file": "Agent_10_23/MyAgent10_23IovC",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9106
+    },
+    {
+      "uid": 7,
+      "file": "MyAgentV2",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9107
+    },
+    {
+      "uid": 8,
+      "file": "MyAgentV3",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9108
+    },
+    {
+      "uid": 9,
+      "file": "MyAgentVOrigin",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9109
+    },
+    {
+      "uid": 10,
+      "file": "MyAgentVInput",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9110
+    },
+    {
+      "uid": 11,
+      "file": "MyAgentVSimples",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9111
+    },
+    {
+      "uid": 12,
+      "file": "MyAgentVValidator",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9112
+    },
+    {
+      "uid": 13,
+      "file": "MyAgentGpt",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9113
+    },
+    {
+      "uid": 14,
+      "file": "RandomMakerAgent",
+      "params": {
+        "min_quantity": "0.1",
+        "max_quantity": "1.0",
+        "expiry_period": "120000000000",
+        "max_fee_rate": "0.01",
+        "min_leverage": "0.0",
+        "max_leverage": "0.0",
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1
+      },
+      "port": 9114
+    },
+    {
+      "uid": 15,
+      "file": "mainnet_field/FieldTakerAgent",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1,
+        "seed": 1,
+        "rate_c0": 0.01,
+        "rate_c1": 0.012,
+        "edge_bps_c0": 1.0,
+        "notional": 1500
+      },
+      "port": 9115
+    },
+    {
+      "uid": 16,
+      "file": "mainnet_field/FieldTakerAgent",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1,
+        "seed": 2,
+        "rate_c0": 0.01,
+        "rate_c1": 0.012,
+        "edge_bps_c0": 1.5,
+        "notional": 1200
+      },
+      "port": 9116
+    },
+    {
+      "uid": 17,
+      "file": "mainnet_field/FieldTakerAgent",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1,
+        "seed": 3,
+        "rate_c0": 0.01,
+        "rate_c1": 0.012,
+        "edge_bps_c0": 2.0,
+        "notional": 1800
+      },
+      "port": 9117
+    },
+    {
+      "uid": 18,
+      "file": "mainnet_field/FieldTakerAgent",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1,
+        "seed": 4,
+        "rate_c0": 0.01,
+        "rate_c1": 0.012,
+        "edge_bps_c0": 1.5,
+        "notional": 1000
+      },
+      "port": 9118
+    },
+    {
+      "uid": 19,
+      "file": "mainnet_field/FieldTakerAgent",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1,
+        "seed": 5,
+        "rate_c0": 0.01,
+        "rate_c1": 0.012,
+        "edge_bps_c0": 2.5,
+        "notional": 1600
+      },
+      "port": 9119
+    },
+    {
+      "uid": 20,
+      "file": "mainnet_field/FieldTakerAgent",
+      "params": {
+        "lazy_load": 1,
+        "gtx_enabled": "false",
+        "event_lookback_minutes": 1,
+        "seed": 6,
+        "rate_c0": 0.01,
+        "rate_c1": 0.012,
+        "edge_bps_c0": 1.0,
+        "notional": 1300
+      },
+      "port": 9120
+    }
+  ],
+  "validators": [
+    {
+      "name": "validator_main",
+      "seed": 7901,
+      "port": 8100
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "agent": "MyAgent10_23_6Gpt",
+  "params": {
+    "lazy_load": 1.0,
+    "persist_state": 0.0,
+    "shield_pre_s": 1.0,
+    "shield_post_s": 1.0,
+    "quiet_size_mult_c0": 2.0,
+    "quiet_size_mult_c1": 1.25
+  },
+  "rounds": 2254,
+  "validators": [
+    "5EWwdZB7qCCMaAso5Mzcks4UUcPxKYvpAj32t5Mg1v6HSxoF"
+  ],
+  "live_uid": 105,
+  "candidate_failed_rounds": 0,
+  "reply_seconds": {
+    "candidate_p50": 0.07116460800170898,
+    "candidate_p90": 0.0874323844909668,
+    "candidate_max": 0.20784974098205566,
+    "live_p50": 0.1156454086303711,
+    "live_p90": 0.2798013687133789
+  },
+  "orders": {
+    "placed": 112667,
+    "refused_post_only": 0,
+    "cancelled": 110951
+  },
+  "classes": {
+    "simulation_0": {
+      "candidate": {
+        "fills": 1498,
+        "notional": 591109.004580775,
+        "captured_bps": 7.537113809128459,
+        "realized_bps": 3.51855810488361,
+        "quality": 0.4668309639456634,
+        "buy_share": 0.5296751552545393,
+        "two_sided_capture": 256.0668667702888,
+        "quality_clamped": 0.23570385389785042,
+        "uid_quality_clamped": 0.23913864268548238,
+        "background_share": 0.9658141335443583,
+        "s3": 1.0,
+        "making_no_s3": 61.23548295617112,
+        "making": 61.23548295617112,
+        "phases": {
+          "1-5s": {
+            "fills": 409,
+            "notional": 112888.60937676062,
+            "captured_bps": 8.391824303027915,
+            "realized_bps": 2.992681392463643,
+            "quality": 0.35661869033457144,
+            "buy_share": 0.4831510305863799
+          },
+          "5-28s": {
+            "fills": 1063,
+            "notional": 470727.89993776707,
+            "captured_bps": 7.355634862539054,
+            "realized_bps": 3.5715081793833825,
+            "quality": 0.4855472363877714,
+            "buy_share": 0.5396181893090625
+          },
+          "28-30s": {
+            "fills": 26,
+            "notional": 7492.49526624761,
+            "captured_bps": 6.046871931812468,
+            "realized_bps": 8.119331032314074,
+            "quality": 1.0,
+            "buy_share": 0.6059621833343347
+          }
+        },
+        "quote_distance_bps_median": 7.104312771135982
+      },
+      "live": {
+        "fills": 1258,
+        "notional": 362547.7967673626,
+        "captured_bps": 7.70542987552048,
+        "realized_bps": 3.7794980169747037,
+        "quality": 0.490498009589557,
+        "buy_share": 0.5247348858721883,
+        "two_sided_capture": 192.41273087281564,
+        "quality_clamped": 0.22964798791697544,
+        "uid_quality_clamped": 0.15036699693806124,
+        "background_share": 0.9197506857873433,
+        "s3": 1.0,
+        "making_no_s3": 28.932524513996672,
+        "making": 28.932524513996672,
+        "phases": {
+          "5-28s": {
+            "fills": 718,
+            "notional": 223258.1752004644,
+            "captured_bps": 7.720956200610029,
+            "realized_bps": 5.370097813039356,
+            "quality": 0.6955223774763891,
+            "buy_share": 0.5474548531573192
+          },
+          "0-1s": {
+            "fills": 149,
+            "notional": 36152.14677735148,
+            "captured_bps": 6.455926186327274,
+            "realized_bps": -2.3987889145901926,
+            "quality": 0.0,
+            "buy_share": 0.4804443874963325
+          },
+          "1-5s": {
+            "fills": 350,
+            "notional": 90631.60294424821,
+            "captured_bps": 8.171237144894743,
+            "realized_bps": 1.9712645994940032,
+            "quality": 0.24124432623101844,
+            "buy_share": 0.4829668241113025
+          },
+          "28-30s": {
+            "fills": 41,
+            "notional": 12505.87184529828,
+            "captured_bps": 7.6652928105592215,
+            "realized_bps": 6.422578172807521,
+            "quality": 0.8378777342934877,
+            "buy_share": 0.5498658447197488
+          }
+        },
+        "quote_distance_bps_median": 7.735995018773339,
+        "real_fill_notional": 411514.9959090006
+      }
+    },
+    "simulation_1": {
+      "candidate": {
+        "fills": 616,
+        "notional": 286244.997264728,
+        "captured_bps": 5.822144113333518,
+        "realized_bps": 1.3697589910813976,
+        "quality": 0.23526710511072016,
+        "buy_share": 0.7531242223099239,
+        "two_sided_capture": 61.12016124675712,
+        "quality_clamped": 0.24830971432445834,
+        "uid_quality_clamped": 0.23913864268548238,
+        "background_share": 0.1874519702107269,
+        "s3": 0.9372598510536344,
+        "making_no_s3": 14.616192401267318,
+        "making": 13.69917031298307,
+        "phases": {
+          "5-28s": {
+            "fills": 211,
+            "notional": 108158.83433043245,
+            "captured_bps": 6.067605855994558,
+            "realized_bps": 2.8113452388265485,
+            "quality": 0.4633368260150005,
+            "buy_share": 0.7362644746343422
+          },
+          "1-5s": {
+            "fills": 403,
+            "notional": 176897.26636991257,
+            "captured_bps": 5.668518470884803,
+            "realized_bps": 0.47540043208478144,
+            "quality": 0.08386678715551153,
+            "buy_share": 0.7617734282765767
+          },
+          "28-30s": {
+            "fills": 2,
+            "notional": 1188.896564383248,
+            "captured_bps": 6.472452186377889,
+            "realized_bps": 4.016780189786115,
+            "quality": 0.6205963480487268,
+            "buy_share": 1.0
+          }
+        },
+        "quote_distance_bps_median": 7.087175761871156
+      },
+      "live": {
+        "fills": 366,
+        "notional": 167120.23165163433,
+        "captured_bps": 5.873230246345846,
+        "realized_bps": -1.008295339361205,
+        "quality": 0.0,
+        "buy_share": 0.590310773494472,
+        "two_sided_capture": 62.95869349963737,
+        "quality_clamped": 0.0,
+        "uid_quality_clamped": 0.15036699693806124,
+        "background_share": 0.10161503277221562,
+        "s3": 0.5080751638610781,
+        "making_no_s3": 9.46690967268431,
+        "making": 4.809901683207106,
+        "phases": {
+          "0-1s": {
+            "fills": 96,
+            "notional": 46868.12750168582,
+            "captured_bps": 5.63427200734051,
+            "realized_bps": -3.9735386521274223,
+            "quality": 0.0,
+            "buy_share": 0.5538926526767727
+          },
+          "1-5s": {
+            "fills": 209,
+            "notional": 91001.24630899547,
+            "captured_bps": 6.195055254627271,
+            "realized_bps": 0.11616070716517818,
+            "quality": 0.018750552237353214,
+            "buy_share": 0.6320686475104439
+          },
+          "5-28s": {
+            "fills": 61,
+            "notional": 29250.857840953155,
+            "captured_bps": 5.254891060121671,
+            "realized_bps": 0.24460808664880537,
+            "quality": 0.04654865036215265,
+            "buy_share": 0.518751523499376
+          }
+        },
+        "quote_distance_bps_median": 7.998720204766782,
+        "real_fill_notional": 279637.42846599984
+      }
+    }
+  },
+  "touches": {
+    "candidate": 0,
+    "live": 6656
+  },
+  "all": {
+    "candidate": {
+      "fills": 2114,
+      "notional": 877354.0018455046,
+      "captured_bps": 6.978001318713627,
+      "realized_bps": 2.818009035786354,
+      "quality": 0.40384186059538396,
+      "buy_share": 0.6025775155943028,
+      "two_sided_capture": 317.1870280170462,
+      "quality_clamped": 0.23913864268548238,
+      "uid_quality_clamped": 0.23913864268548238,
+      "background_share": null,
+      "s3": 1.0,
+      "making_no_s3": 75.8516753574385,
+      "making": 75.8516753574385
+    },
+    "live": {
+      "fills": 1624,
+      "notional": 529668.028418997,
+      "captured_bps": 7.1266996263235916,
+      "realized_bps": 2.267195100799752,
+      "quality": 0.3181269338791141,
+      "buy_share": 0.5454253125964688,
+      "two_sided_capture": 255.371424372453,
+      "quality_clamped": 0.15036699693806124,
+      "uid_quality_clamped": 0.15036699693806124,
+      "background_share": null,
+      "s3": 1.0,
+      "making_no_s3": 38.39943418668098,
+      "making": 38.39943418668098
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+ "name": "l2_1027",
+ "minutes": 30,
+ "simulation_xml": "simulate/trading/run/config/multiasset_simulation_64_3c.xml",
+ "taosim_bin": "simulate/trading/build/src/cpp/taosim",
+ "timeout": 5,
+ "proxy_port": 8400,
+ "agent_port": 9400,
+ "validators": [
+  {
+   "name": "v065_a",
+   "seed": 1001
+  },
+  {
+   "name": "v065_b",
+   "seed": 2002
+  }
+ ],
+ "agents": [
+  {
+   "file": "ArbitrageAgent"
+  },
+  {
+   "file": "RandomMakerAgent"
+  },
+  {
+   "file": "RandomTakerAgent"
+  },
+  {
+   "file": "Agent_10_23/MyAgent10_23_9Gpt",
+   "params": {
+    "event_lookback_minutes": "1",
+    "latency_s": "1.05",
+    "shield_pre_s": "3",
+    "shield_post_s": "1",
+    "shield_post_s_c1": "5",
+    "shield_post_s_c2": "5",
+    "quiet_size_mult_c0": "2.5",
+    "quiet_size_mult_c1": "1.25",
+    "quiet_size_mult_c2": "1.6",
+    "skew_c1": "8",
+    "max_inv_ratio_c1": "0.06",
+    "half_spread_c0": "0.0004",
+    "size_fraction_c0": "0.024",
+    "size_fraction_c1": "0.024",
+    "size_fraction_c2": "0.024",
+    "max_order_fraction": "0.06",
+    "coef_fund_c2": "0.004",
+    "pace_burst": "8",
+    "adapt_max": "1.0",
+    "max_lean": "0.75",
+    "pending_aware": "1",
+    "fill_skew_c0": "0.6",
+    "fill_skew_c2": "0.6"
+   }
+  },
+  {
+   "file": "Agent_10_23/MyAgent10_23_9Gpt",
+   "params": {
+    "event_lookback_minutes": "1",
+    "latency_s": "1.05",
+    "shield_pre_s": "3",
+    "shield_post_s": "1",
+    "shield_post_s_c1": "5",
+    "shield_post_s_c2": "5",
+    "quiet_size_mult_c0": "2.5",
+    "quiet_size_mult_c1": "1.25",
+    "quiet_size_mult_c2": "1.6",
+    "skew_c1": "8",
+    "max_inv_ratio_c1": "0.06",
+    "half_spread_c0": "0.0004",
+    "size_fraction_c0": "0.024",
+    "size_fraction_c1": "0.024",
+    "size_fraction_c2": "0.024",
+    "max_order_fraction": "0.06",
+    "coef_fund_c2": "0.004",
+    "pace_burst": "8",
+    "adapt_max": "1.0",
+    "max_lean": "0.75",
+    "pending_aware": "1",
+    "fill_skew_c0": "0.6",
+    "fill_skew_c2": "0.6",
+    "shield_post_s_c0": "5"
+   }
+  },
+  {
+   "file": "Agent_10_23/MyAgent10_26_5Gpt",
+   "params": {
+    "event_lookback_minutes": "1",
+    "latency_s": "1.05",
+    "shield_pre_s": "3",
+    "shield_post_s": "1",
+    "shield_post_s_c1": "5",
+    "shield_post_s_c2": "5",
+    "quiet_size_mult_c0": "2.5",
+    "quiet_size_mult_c1": "1.25",
+    "quiet_size_mult_c2": "1.6",
+    "skew_c1": "8",
+    "max_inv_ratio_c1": "0.06",
+    "half_spread_c0": "0.0004",
+    "size_fraction_c0": "0.024",
+    "size_fraction_c1": "0.024",
+    "size_fraction_c2": "0.024",
+    "max_order_fraction": "0.06",
+    "coef_fund_c2": "0.004",
+    "pace_burst": "8",
+    "adapt_max": "1.0",
+    "max_lean": "0.75",
+    "pending_aware": "1",
+    "fill_skew_c0": "0.6",
+    "fill_skew_c2": "0.6",
+    "shield_post_s_c0": "5",
+    "balance_basis": "0",
+    "inv_target_k_c2": "0.001",
+    "inv_target_hold_s_c2": "600",
+    "fund_demean_s_c0": "600",
+    "coef_fund_dm_c0": "0.07"
+   }
+  }
+ ],
+ "common_params": {
+  "lazy_load": 1,
+  "gtx_enabled": "false",
+  "persist_state": 0
+ },
+ "agent_params": {},
+ "min_available_mb": 6000,
+ "stall_minutes": 10
+}

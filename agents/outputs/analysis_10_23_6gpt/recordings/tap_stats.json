@@ -1,0 +1,22 @@
+{
+  "written": 579,
+  "dropped_queue": 0,
+  "dropped_disk": 0,
+  "skipped": 0,
+  "errors": 0,
+  "bytes": 787337667,
+  "max_bytes": 15000000000.0,
+  "validators": {
+    "5EWwdZB7qCCMaAso5Mzcks4UUcPxKYvpAj32t5Mg1v6HSxoF": 579
+  },
+  "reply_seconds": {
+    "5EWwdZB7qCCMaAso5Mzcks4UUcPxKYvpAj32t5Mg1v6HSxoF": {
+      "rounds": 300,
+      "p50": 0.09815716743469238,
+      "p90": 0.12579083442687988,
+      "max": 0.3223457336425781,
+      "last_round": 1792774785.5968175
+    }
+  },
+  "at": 1792774785.604917
+}
